@@ -90,3 +90,10 @@ Ethical Disclaimer
  This project is intended **only for educational and ethical penetration testing** in fully authorized environments.  
  It demonstrates how easily USB-based attacks can occur with physical access and aims to raise awareness.  
  **Do not use this code on unauthorized systems. You are responsible for your actions.**
+
+Acknowledgments
+
+- PowerSploit Project  
+- LaZagne by AlessandroZ  
+- Raspberry Pi HID gadget community  
+- Offensive Security & PowerShell Community
