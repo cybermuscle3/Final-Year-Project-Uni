@@ -1,0 +1,51 @@
+import time
+import board
+import busio
+import sqlite3
+from adafruit_pn532.i2c import PN532_I2C
+
+# Initialize I2C for PN532
+i2c = busio.I2C(board.SCL, board.SDA)
+pn532 = PN532_I2C(i2c, debug=False)
+
+# Connect to SQLite database
+db = sqlite3.connect("nfc_logs.db")
+cursor = db.cursor()
+
+#Track time of last scan
+last_scan_time = time.time()
+exit_prompt_interval = 10 #seconds of inactivity before asking for exit
+
+print(" Scanning NFC cards...")
+
+while True:
+    uid = pn532.read_passive_target(timeout=0.5)
+    now = time.time()
+    if uid:
+	last_scan_time = now #update last scan time
+        uid_str = "-".join([hex(i) for i in uid])
+        timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+
+        print(f" NFC Card Scanned! UID: {uid_str}")
+
+        # Log scan in database
+        cursor.execute("INSERT OR IGNORE INTO scans (uid, name, timestamp) VALUES (?, NULL, ?)", (uid_str, timestamp))
+        db.commit()
+
+        # Log to file
+        with open("log.txt", "a") as f:
+            f.write(f"{timestamp} - {uid_str}\n")
+
+        print(" Scan logged in log.txt and database!")
+
+#IF noscan within 10 seconds, ask user if they want to exit
+elif now - last_scan_time > exit_prompt_interval:
+        response = input("⏳ No scans detected in 10s. Press [Enter] to exit or type anything to continue: ").strip()
+        if response == "":
+            print("Exiting scanner. Goodbye!")
+            break
+        else:
+            print("Continuing scan session...")
+            last_scan_time = now  # reset timeout
+
+    time.sleep(0.5)
